@@ -49,4 +49,5 @@ In MATLAB, run `acdc_verification.m` in `verification/acdc/` (ACDC 2024_02_12 is
 
 ## Licence
 
-MIT. ACDC in `verification/acdc/ACDC/` is GPL-3.0 (https://github.com/tolenius/ACDC).
+MIT. `verification/acdc/ACDC/` is an unchanged copy of ACDC 2024_02_12 (https://github.com/tolenius/ACDC, commit
+870b82a), under its own GPL-3.0 licence.
