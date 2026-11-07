@@ -1,0 +1,9 @@
+__pycache__/
+fortran/*.o
+fortran/*.mod
+fortran/test_klustr
+verification/acdc/work_*/
+verification/acdc/sources.txt
+verification/acdc/acdc_*_*.csv
+verification/klustr_*_*.csv
+verification/acdc/klustr_*_*.csv

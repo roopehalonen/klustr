@@ -1,0 +1,14 @@
+# sulfuric_acid dimethylamine
+# Sulfuric acid (A) - dimethylamine (D), all clusters with up to 4 A and 4 D. Out: at least 5 A and 4 D or 4 A and 5 D.
+name:                    A        D
+mass [g/mol]:            98.08    45.08
+density [kg/m**3]:       1830.0   680.0
+acid strength:           2        -1
+base strength:           -1       2
+                         1-4      0
+                         0-4      1
+                         0-4      2
+                         0-4      3
+                         0-4      4
+out neutral              5        4
+out neutral              4        5

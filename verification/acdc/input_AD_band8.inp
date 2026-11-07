@@ -1,0 +1,27 @@
+# sulfuric_acid dimethylamine
+# As input_AD.inp, extended along the diagonal band (at most one more A than D or D than A) up to 8A8D.
+# The added clusters do not evaporate. Out: at least 9 A and 8 D or 8 A and 9 D.
+name:                    A        D
+mass [g/mol]:            98.08    45.08
+density [kg/m**3]:       1830.0   680.0
+acid strength:           2        -1
+base strength:           -1       2
+                         1-4      0
+                         0-4      1
+                         0-4      2
+                         0-4      3
+                         0-4      4
+no evap                  5        4
+no evap                  4        5
+no evap                  5        5
+no evap                  6        5
+no evap                  5        6
+no evap                  6        6
+no evap                  7        6
+no evap                  6        7
+no evap                  7        7
+no evap                  8        7
+no evap                  7        8
+no evap                  8        8
+out neutral              9        8
+out neutral              8        9
