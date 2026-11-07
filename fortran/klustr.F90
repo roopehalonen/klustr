@@ -1,4 +1,4 @@
-!> KLUSTR v1.0: formation rate of new particles from an acid and a base whose pair is the critical cluster or has no
+!> KLUSTR v1.0: formation rate of new particles from two compounds A and B whose pair is the critical cluster or has no
 !> barrier (Algorithm 1 of Halonen, R., Geosci. Model Dev., submitted, 2026). Fortran 2008, no dependencies.
 !>   call klustr_setup(8, -1.7_wp, 98.08_wp, 45.08_wp, 1830.0_wp, 680.0_wp, 3.0_wp)   ! once
 !>   J = klustr_rate(a_mono, b_free, cs_a, t, dg_kt)                                   ! cm-3 s-1, elemental
@@ -116,8 +116,8 @@ contains
     end do
   end function klustr_reduced
 
-  !> Formation rate J (cm-3 s-1) past n pairs; elemental. a_mono: acid monomer concentration (all clusters with one
-  !> acid), b_free: free base concentration (cm-3); cs_a: loss rate coefficient of the acid (s-1); t (K); dg_kt: standard
+  !> Formation rate J (cm-3 s-1) past n pairs; elemental. a_mono: monomer concentration of A (all clusters with one
+  !> A), b_free: free concentration of B (cm-3); cs_a: loss rate coefficient of A (s-1); t (K); dg_kt: standard
   !> formation free energy of the pair at 1 atm over kB T.
   elemental real(wp) function klustr_rate(a_mono, b_free, cs_a, t, dg_kt) result(j)
     real(wp), intent(in) :: a_mono, b_free, cs_a, t, dg_kt

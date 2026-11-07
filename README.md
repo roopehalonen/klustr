@@ -1,6 +1,6 @@
 # KLUSTR
 
-KLUSTR calculates the formation rate of new particles from an acid and a base when their pair is the critical
+KLUSTR calculates the formation rate of new particles from two compounds A and B when their pair is the critical
 cluster or there is no barrier. The only thermodynamic input is the formation free energy of the pair.
 
 The model is described in
@@ -34,8 +34,8 @@ call klustr_setup(8, -1.7_wp, 98.08_wp, 45.08_wp, 1830.0_wp, 680.0_wp, 3.0_wp)
 J = klustr_rate(a_mono, b_free, cs_a, t, dg_kt)
 ```
 
-The inputs are the monomer concentration of the acid and the free concentration of the base (cm-3), the loss rate
-coefficient of the acid (s-1), the temperature (K) and the standard formation free energy of the pair at 1 atm in
+The inputs are the monomer concentration of A and the free concentration of B (cm-3), the loss rate coefficient of A
+(s-1), the temperature (K) and the standard formation free energy of the pair at 1 atm in
 units of kB T. J is the formation rate past N pairs (cm-3 s-1). N = 8 is about 1.7 nm in mobility diameter for
 sulfuric acid and dimethylamine. The arguments are explained in `klustr.py` and `klustr.F90`.
 

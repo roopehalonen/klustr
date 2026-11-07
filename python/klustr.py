@@ -1,4 +1,4 @@
-"""KLUSTR v1.0: formation rate of new particles from an acid and a base whose pair is the critical cluster or has no
+"""KLUSTR v1.0: formation rate of new particles from two compounds A and B whose pair is the critical cluster or has no
 barrier (Algorithm 1 of Halonen, R., Geosci. Model Dev., submitted, 2026). Standard library only.
 
     const = setup(N=8, gamma=-1.7, mA=98.08, mB=45.08, densA=1830.0, densB=680.0, eta=3.0)    # once
@@ -67,8 +67,8 @@ def reduced(a, b, s, const, clusters=False):
 
 
 def rate(a_mono, b_free, CS_A, T, dG_kT, const, clusters=False):
-    """Formation rate J (cm-3 s-1) past N pairs. a_mono: acid monomer concentration (all clusters with one acid),
-    b_free: free base concentration (cm-3); CS_A: loss rate coefficient of the acid (s-1); T (K); dG_kT: standard
+    """Formation rate J (cm-3 s-1) past N pairs. a_mono: monomer concentration of A (all clusters with one A),
+    b_free: free concentration of B (cm-3); CS_A: loss rate coefficient of A (s-1); T (K); dG_kT: standard
     formation free energy of the pair at 1 atm over kB T. clusters=True also returns c_1 ... c_N (cm-3)."""
     sat = P0/(KB*T)*1e-6*exp(dG_kT)                          # saturation concentration of the pair (cm-3)
     bAB = const['bABf']*sqrt(T)                              # collision coefficient of A and B (cm3 s-1)
