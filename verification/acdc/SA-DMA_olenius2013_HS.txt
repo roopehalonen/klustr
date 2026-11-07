@@ -1,7 +1,8 @@
 101325
 298.15
 
-# Sulfuric acid (A) and dimethylamine (D), Olenius et al. (2013): H (kcal/mol) and S (cal/mol/K) of formation at 1 atm
+# Olenius et al. (2013), from ACDC 2024_02_12 Energy_and_rate_files/B3LYP_RICC2/HS298.15K_example.txt, sulfuric acid (A)
+# and dimethylamine (D) only: H (kcal/mol) and S (cal/mol/K) of formation at 1 atm
 
 2A	-17.8487481487	-33.418352
 3A	-35.8209843665	-72.191130
