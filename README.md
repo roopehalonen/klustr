@@ -6,7 +6,7 @@ cluster or there is no barrier. The only thermodynamic input is the formation fr
 The model is described in
 
 > Halonen, R.: KLUSTR v1.0: a closed-form steady-state model of atmospheric new particle formation from the free
-> energy of the acid–base pair, Geosci. Model Dev., submitted, 2026.
+> energy of the nucleating pair, Geosci. Model Dev., submitted, 2026.
 
 ## Contents
 
