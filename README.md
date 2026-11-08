@@ -32,6 +32,7 @@ Fortran 2008:
 use klustr
 call klustr_setup(8, -1.7_wp, 98.08_wp, 45.08_wp, 1830.0_wp, 680.0_wp, 3.0_wp)
 J = klustr_rate(a_mono, b_free, cs_a, t, dg_kt)
+call klustr_rate_block(ncell, a_mono, b_free, cs_a, t, dg_kt, J)   ! arrays of ncell grid cells, faster
 ```
 
 The inputs are the monomer concentration of A and the free concentration of B (cm-3), the loss rate coefficient of A
@@ -43,7 +44,7 @@ Tests: `python test_klustr.py` in `python/` and `make test` in `fortran/`.
 
 ## Verification
 
-In MATLAB, run `acdc_verification.m` in `verification/acdc/` (ACDC 2024_02_12 is included). Then
+In MATLAB, run `acdc_verification.m` in `verification/acdc/` (ACDC 2024_02_12 is included and needs Perl). Then
 `verification/klustr_rates.sh` calculates the KLUSTR rates for the ACDC output.
 
 ## Licence

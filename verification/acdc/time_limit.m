@@ -1,5 +1,5 @@
 function varargout = time_limit(t, y)
-% Wall-time limit of one steady state, used by ode15s as an event function (as on the server).
+% Wall-time limit of one steady state, used by ode15s as an event function.
 %   time_limit('set', seconds)   start the clock for a new condition
 %   time_limit('expired')        true when the limit has been reached
 % After the limit the event value changes sign at every call, so every ode15s run stops at its first step.
