@@ -1,56 +1,46 @@
-% KLUSTR v1.0 verification (Sect. 5 of the paper): ACDC steady states for sulfuric acid (A) and dimethylamine (D),
-% cluster sets 4x4 (input_AD.inp) and band8 (input_AD_band8.inp), free energies olenius2013 and myllys19_anharmonic.
-% Acid monomer (1A + 1A1D + ... + 1A4D) and free base fixed, sink CS (d/d_1A)^-1.7. Run in this folder: acdc_verification
-% Writes acdc_<free energies>_<set>.csv: T, CS, CA, CB, converged, J, time (s, of the steady state), stable (1: the
-% largest cluster of the set collides more often than it evaporates in the steady state) and all cluster concentrations.
+% KLUSTR v1.0: ACDC STEADY STATES FOR THE VERIFICATION (Sect. 5 of the paper) by R. Halonen 2026
+% Sulfuric acid (A) and dimethylamine (D), cluster sets 4x4 (input_AD.inp) and band8 (input_AD_band8.inp),
+% free energies olenius2013 (H and S) and myllys19_anharmonic (G at each temperature).
+% Acid monomer (1A + 1A1D + ... + 1A4D) and free base fixed, sink CS (d/d_1A)^-1.7.
+%
+% Output acdc_<free energies>_<set>.csv, one row per condition: T, CS, CA, CB, converged (1 yes, 0 no, -1 negative
+% concentrations), J (cm-3 s-1), time (s), stable (1: the largest cluster collides more often than it evaporates)
+% and the concentrations of all clusters (cm-3).
 
-energy_sets={'olenius2013','myllys19_anharmonic'};
-sets={'4x4','band8'};
 Ts=208:10:328;             % K
 CAs=10.^(3:0.5:11);        % acid monomer, cm-3
 CBs=10.^(2:0.5:12);        % free base, cm-3
 CSs=[0 10.^(-5:0.5:0)];    % sink of 1A, s-1
 tmax=120;                  % s, wall-time limit of one steady state
 
+cd(fileparts(mfilename('fullpath')))
 fclose('all');
-home=fileparts(mfilename('fullpath'));   % the folder of this script, wherever MATLAB is
-acdc=fullfile(home,'ACDC','acdc_2024_02_12.pl');   % ACDC version 2024_02_12 (GPL-3.0, ACDC/LICENSE)
-cd(home)
-addpath(home)              % time_limit.m, also from the work folders
-
-% steady-state settings: windows of 20 output times, the driver's convergence test at 1e-6
+% steady state: windows of 20 output times, converged when no concentration changes by more than 1e-6
 opts={'Sources_in','sources.txt','difftol',1e-6,'Options','''RelTol'',1e-8,''AbsTol'',1e-4,''Events'',@time_limit'};
 tw=@(L) L*(1:20)/20;
 
-for fe=energy_sets
-    fe=fe{1};
-    for set=sets
-        set=set{1};
-        inp=fullfile(home,'input_AD.inp');
-        if strcmp(set,'band8'), inp=fullfile(home,'input_AD_band8.inp'); end
-        out=fullfile(home,['acdc_' fe '_' set '.csv']);
-
-        % ACDC writes its files into the current folder, so each run works in its own folder
-        work=fullfile(home,['work_' fe '_' set]);
-        if ~exist(work,'dir'), mkdir(work); end
-        cd(work)
-
-        fid=[]; clust={}; times=[]; nbad_all=0; nstop=0; tset=tic;
+for fe=["olenius2013" "myllys19_anharmonic"]
+    for cset=["4x4" "band8"]
+        if cset=="4x4", inp='input_AD.inp'; big="4A4D"; else, inp='input_AD_band8.inp'; big="8A8D"; end
+        fid=-1; times=[]; nbad=0; nstop=0; t1=tic;
         for T=Ts
             tT=tic;
-            if strcmp(fe,'olenius2013')
-                energies=fullfile(home,'SA-DMA_olenius2013_HS.txt');
-            else
-                energies=fullfile(home,fe,sprintf('G%dK.txt',T));
-            end
-            % equations for this temperature; the sink is generated for CS = 1 s-1 and scaled with CSfactor
-            [status,msg]=system(sprintf(['perl "' acdc '" --i "%s" --e "%s" --temperature %d --cs exp_loss --exp_loss_coefficient 1 ' ...
-                '--exp_loss_exponent -1.7 --silent'],inp,energies,T));
-            if status~=0, cd(home), error('ACDC generator failed at %d K:\n%s',T,msg); end
+            if fe=="olenius2013", energies='SA-DMA_olenius2013_HS.txt'; else, energies=sprintf('%s/G%dK.txt',fe,T); end
+            [status,msg]=system(sprintf(['perl ACDC/acdc_2024_02_12.pl --i %s --e %s --temperature %d --cs exp_loss ' ...
+                '--exp_loss_coefficient 1 --exp_loss_exponent -1.7 --silent'],inp,energies,T));
+            if status, error('ACDC generator failed at %d K:\n%s',T,msg), end
             clear driver_acdc equations_acdc dofluxes formationrate get_coll get_evap get_cs get_wl
             rehash
-            [K,E]=coefficients(); Eb=[];
-            k=0; nbad=0; n=numel(CSs)*numel(CBs)*numel(CAs);
+
+            % the largest cluster (the last one in ACDC's order): collision coefficients with every cluster
+            % (cm3 s-1) and total evaporation rate (s-1), every channel once as in get_evap.m
+            get_coll
+            Kb=1e6*K(end,:); Kb(isnan(Kb))=0;
+            L=readlines('get_evap.m'); Eb=0;
+            for l=L(contains(L,"% "+big+" ->"))'
+                Eb=Eb+str2num(char(extractBetween(l,'= ',';'))); %#ok<ST2NM>
+            end
+
             for CS=CSs
                 for CB=CBs
                     for CA=CAs
@@ -71,62 +61,32 @@ for fe=energy_sets
                         if ok==-1, J=NaN; elseif stopped, ok=0; end
                         time=toc(t0);
                         if ~isempty(cl), clust=cl; end
-                        if isempty(fid) && ~isempty(clust)
-                            fid=fopen(out,'w');
+                        if fid<0
+                            fid=fopen(sprintf('acdc_%s_%s.csv',fe,cset),'w');
                             fprintf(fid,'T,CS,CA,CB,converged,J,time,stable%s\n',sprintf(',%s',clust{:}));
                         end
-                        if numel(C)<numel(clust), C=nan(1,numel(clust)); end
-                        if isempty(Eb) && ~isempty(clust), [Eb,Kb]=largest(K,E,clust); end
-                        % the largest cluster: evaporation against collisions with every cluster (s-1)
-                        stable=double(all(isfinite(C(1:numel(clust)))) && Eb<=Kb(1:numel(clust))*reshape(C(1:numel(clust)),[],1));
-                        fprintf(fid,'%d,%g,%e,%e,%d,%e,%.4f,%d%s\n',T,CS,CA,CB,ok,J(end),time,stable,sprintf(',%e',C(1:numel(clust))));
-                        k=k+1; nbad=nbad+(ok~=1); nstop=nstop+stopped; times(end+1)=time; %#ok<SAGROW>
-                        if mod(k,200)==0
-                            fprintf('%s %s %d K: %d/%d conditions, %d not converged, %.0f s\n',fe,set,T,k,n,nbad,toc(tT));
+                        n=numel(clust);
+                        if numel(C)<n, C=nan(1,n); end
+                        stable=double(Eb<=Kb(1:n)*reshape(C(1:n),[],1));
+                        fprintf(fid,'%d,%g,%e,%e,%d,%e,%.4f,%d%s\n',T,CS,CA,CB,ok,J(end),time,stable,sprintf(',%e',C(1:n)));
+                        times(end+1)=time; nbad=nbad+(ok~=1); nstop=nstop+stopped; %#ok<SAGROW>
+                        if mod(numel(times),200)==0
+                            fprintf('%s %s %d K: %d conditions, %d not converged, %.0f s\n',fe,cset,T,numel(times),nbad,toc(tT));
                         end
                     end
                 end
             end
-            fprintf('%s %s %d K done: %d conditions, %d not converged, %.0f s\n',fe,set,T,n,nbad,toc(tT));
-            nbad_all=nbad_all+nbad;
         end
         fclose(fid);
-        fprintf(['%s %s: %d conditions, %d not converged, %d stopped at %d s; time per steady state: mean %.3f s, ' ...
-            'median %.3f s; total %.2f h\n'],fe,set,numel(times),nbad_all,nstop,tmax,mean(times),median(times),toc(tset)/3600);
-        cd(home)
+        fprintf('%s %s: %d conditions, %d not converged, %d stopped at %d s, time per steady state %.3f s (mean), %.3f s (median), %.1f h\n', ...
+            fe,cset,numel(times),nbad,nstop,tmax,mean(times),median(times),toc(t1)/3600);
     end
 end
-
-
-function [K,E]=coefficients()
-% ACDC's collision (K, m3 s-1) and evaporation (E, s-1) coefficients, from the files of the generator in this folder
-    get_coll
-    get_evap
-end
-
-
-function [Eb,Kb]=largest(K,E,clust)
-% The largest cluster of the set: its total evaporation rate Eb (s-1), each channel once as in get_evap.m, and its
-% collision coefficients with every cluster Kb (cm3 s-1; 0 for collisions that are not in the set)
-    v=zeros(numel(clust),2);
-    for i=1:numel(clust)
-        t=regexp(clust{i},'(\d+)A','tokens','once'); if ~isempty(t), v(i,1)=str2double(t{1}); end
-        t=regexp(clust{i},'(\d+)D','tokens','once'); if ~isempty(t), v(i,2)=str2double(t{1}); end
-    end
-    [~,b]=max(sum(v,2));
-    Eb=0;
-    for i=1:numel(clust)
-        for j=i:numel(clust)
-            if all(v(i,:)+v(j,:)==v(b,:)) && isfinite(E(i,j)), Eb=Eb+E(i,j); end
-        end
-    end
-    Kb=1e6*K(b,:); Kb(~isfinite(Kb))=0;
-end
+delete('driver_acdc.m','equations_acdc.m','dofluxes.m','formationrate.m','get_*.m','sources.txt')
 
 
 function [ok,clust,C,J]=steady(tw,C0,opts,CS,extra)
-% One call of ACDC's driver. When the driver finds negative concentrations it returns early without
-% the formation rate; the condition is then marked with ok = -1.
+% One call of ACDC's driver. With negative concentrations the driver returns early without J: ok = -1.
     clust={}; J=NaN;
     try
         if isempty(C0)
