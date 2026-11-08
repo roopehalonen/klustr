@@ -47,9 +47,9 @@ Tests: `python test_klustr.py` in `python/` and `make test` in `fortran/`.
 In MATLAB, run `acdc_verification.m` in `verification/acdc/` (ACDC 2024_02_12 is included and needs Perl). It
 calculates the ACDC steady states of Sect. 5 of the paper, about two hours for each free-energy set and cluster set
 on a laptop. Then `python3 klustr_verification.py` in `verification/` selects the conditions of the comparison and
-writes the ACDC and KLUSTR values for them into `verification/acdc/klustr_<free energies>_<set>.csv`; the columns are
-explained in the script. Conditions near the 120 s limit of one ACDC steady state can converge differently on another
-computer, which changes the number of conditions by a few.
+writes the ACDC and KLUSTR values for them into `verification/acdc/klustr_<free energies>_<set>.csv`. Conditions near
+the 120 s limit of one ACDC steady state can converge differently on another computer, which changes the number of
+conditions by a few.
 
 ## Licence
 
