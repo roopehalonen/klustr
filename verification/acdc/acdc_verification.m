@@ -1,7 +1,8 @@
 % KLUSTR v1.0 verification (Sect. 5 of the paper): ACDC steady states for sulfuric acid (A) and dimethylamine (D),
 % cluster sets 4x4 (input_AD.inp) and band8 (input_AD_band8.inp), free energies olenius2013 and myllys19_anharmonic.
 % Acid monomer (1A + 1A1D + ... + 1A4D) and free base fixed, sink CS (d/d_1A)^-1.7. Run in this folder: acdc_verification
-% Writes acdc_<free energies>_<set>.csv: T, CS, CA, CB, converged, J, time and all cluster concentrations.
+% Writes acdc_<free energies>_<set>.csv: T, CS, CA, CB, converged, J, time (s, of the steady state), stable (1: the
+% largest cluster of the set collides more often than it evaporates in the steady state) and all cluster concentrations.
 
 energy_sets={'olenius2013','myllys19_anharmonic'};
 sets={'4x4','band8'};
@@ -34,7 +35,7 @@ for fe=energy_sets
         if ~exist(work,'dir'), mkdir(work); end
         cd(work)
 
-        fid=[]; clust={};
+        fid=[]; clust={}; times=[]; nbad_all=0; nstop=0; tset=tic;
         for T=Ts
             tT=tic;
             if strcmp(fe,'olenius2013')
@@ -48,6 +49,7 @@ for fe=energy_sets
             if status~=0, cd(home), error('ACDC generator failed at %d K:\n%s',T,msg); end
             clear driver_acdc equations_acdc dofluxes formationrate get_coll get_evap get_cs get_wl
             rehash
+            [K,E]=coefficients(); Eb=[];
             k=0; nbad=0; n=numel(CSs)*numel(CBs)*numel(CAs);
             for CS=CSs
                 for CB=CBs
@@ -65,16 +67,20 @@ for fe=energy_sets
                                 if ok==1 || ok==-1 || time_limit('expired'), break, end
                             end
                         end
-                        if ok==-1, J=NaN; elseif time_limit('expired'), ok=0; end
+                        stopped=time_limit('expired');
+                        if ok==-1, J=NaN; elseif stopped, ok=0; end
                         time=toc(t0);
                         if ~isempty(cl), clust=cl; end
                         if isempty(fid) && ~isempty(clust)
                             fid=fopen(out,'w');
-                            fprintf(fid,'T,CS,CA,CB,converged,J,time%s\n',sprintf(',%s',clust{:}));
+                            fprintf(fid,'T,CS,CA,CB,converged,J,time,stable%s\n',sprintf(',%s',clust{:}));
                         end
                         if numel(C)<numel(clust), C=nan(1,numel(clust)); end
-                        fprintf(fid,'%d,%g,%e,%e,%d,%e,%.4f%s\n',T,CS,CA,CB,ok,J(end),time,sprintf(',%e',C(1:numel(clust))));
-                        k=k+1; nbad=nbad+(ok~=1);
+                        if isempty(Eb) && ~isempty(clust), [Eb,Kb]=largest(K,E,clust); end
+                        % the largest cluster: evaporation against collisions with every cluster (s-1)
+                        stable=double(all(isfinite(C(1:numel(clust)))) && Eb<=Kb(1:numel(clust))*reshape(C(1:numel(clust)),[],1));
+                        fprintf(fid,'%d,%g,%e,%e,%d,%e,%.4f,%d%s\n',T,CS,CA,CB,ok,J(end),time,stable,sprintf(',%e',C(1:numel(clust))));
+                        k=k+1; nbad=nbad+(ok~=1); nstop=nstop+stopped; times(end+1)=time; %#ok<SAGROW>
                         if mod(k,200)==0
                             fprintf('%s %s %d K: %d/%d conditions, %d not converged, %.0f s\n',fe,set,T,k,n,nbad,toc(tT));
                         end
@@ -82,10 +88,39 @@ for fe=energy_sets
                 end
             end
             fprintf('%s %s %d K done: %d conditions, %d not converged, %.0f s\n',fe,set,T,n,nbad,toc(tT));
+            nbad_all=nbad_all+nbad;
         end
         fclose(fid);
+        fprintf(['%s %s: %d conditions, %d not converged, %d stopped at %d s; time per steady state: mean %.3f s, ' ...
+            'median %.3f s; total %.2f h\n'],fe,set,numel(times),nbad_all,nstop,tmax,mean(times),median(times),toc(tset)/3600);
         cd(home)
     end
+end
+
+
+function [K,E]=coefficients()
+% ACDC's collision (K, m3 s-1) and evaporation (E, s-1) coefficients, from the files of the generator in this folder
+    get_coll
+    get_evap
+end
+
+
+function [Eb,Kb]=largest(K,E,clust)
+% The largest cluster of the set: its total evaporation rate Eb (s-1), each channel once as in get_evap.m, and its
+% collision coefficients with every cluster Kb (cm3 s-1; 0 for collisions that are not in the set)
+    v=zeros(numel(clust),2);
+    for i=1:numel(clust)
+        t=regexp(clust{i},'(\d+)A','tokens','once'); if ~isempty(t), v(i,1)=str2double(t{1}); end
+        t=regexp(clust{i},'(\d+)D','tokens','once'); if ~isempty(t), v(i,2)=str2double(t{1}); end
+    end
+    [~,b]=max(sum(v,2));
+    Eb=0;
+    for i=1:numel(clust)
+        for j=i:numel(clust)
+            if all(v(i,:)+v(j,:)==v(b,:)) && isfinite(E(i,j)), Eb=Eb+E(i,j); end
+        end
+    end
+    Kb=1e6*K(b,:); Kb(~isfinite(Kb))=0;
 end
 
 
