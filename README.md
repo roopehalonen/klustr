@@ -56,5 +56,5 @@ The ACDC and KLUSTR values of the compared conditions of the paper (Fig. 1 and t
 
 ## Licence
 
-MIT. `verification/acdc/ACDC/` is an unchanged copy of ACDC 2024_02_12 (https://github.com/tolenius/ACDC, commit
-870b82a), under its own GPL-3.0 licence.
+MIT. `verification/acdc/ACDC/` is an unchanged copy of ACDC 2024_02_12 (https://github.com/tolenius/ACDC), under its
+own GPL-3.0 licence.

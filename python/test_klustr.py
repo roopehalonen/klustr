@@ -1,4 +1,11 @@
-"""Test of the Python version: the 50 reference cases of test_reference.txt and four identities. python test_klustr.py"""
+"""Test of the Python version: python test_klustr.py
+1. the 50 reference cases of test_reference.txt (N = 4, 8 and 16, open and closed systems, both countings, eta = 1
+   and 3) to a relative difference of 1e-12;
+2. eta scales out: J with eta = 3 equals 3 J with eta = 1 and CS_A/3;
+3. with a barrier, C_A C_B < c_sat^2, open and closed systems give the same J;
+4. with clusters=True, the same J and N cluster concentrations, the pair at most at c_sat;
+5. the documented condition of klustr.py gives J = 2.235716e+02 cm-3 s-1.
+"""
 import os, sys, math, random
 import klustr
 
@@ -23,7 +30,7 @@ for line in open(os.path.join(here, 'test_reference.txt')):
     worst = max(worst, abs(J/Jref - 1) if Jref > 0 else abs(J))
 check(f'reference values (largest relative difference {worst:.1e})', worst < 1e-12)
 
-# 2. eta scales out, 3. open and closed systems agree with a barrier
+# 2. eta scales out, 3. open and closed systems agree with a barrier, 4. cluster concentrations
 rng = random.Random(1)
 c1 = klustr.setup(8, -1.7, 98.08, 45.08, 1830.0, 680.0, 1.0)
 c3 = klustr.setup(8, -1.7, 98.08, 45.08, 1830.0, 680.0, 3.0)

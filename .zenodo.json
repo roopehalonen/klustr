@@ -2,7 +2,7 @@
   "title": "KLUSTR v1.0",
   "upload_type": "software",
   "version": "1.0",
-  "description": "<p>KLUSTR calculates the formation rate of new particles from two compounds A and B when their pair is the critical cluster or there is no barrier. The only thermodynamic input is the formation free energy of the pair.</p><p>Contents: KLUSTR in Python and as a Fortran module, each with a test, and the ACDC simulations and KLUSTR rates of Sect. 5 of the paper. verification/acdc/ACDC/ is an unchanged copy of ACDC 2024_02_12 (https://github.com/tolenius/ACDC, commit 870b82a) under its own GPL-3.0 licence.</p><p>The model is described in Halonen, R.: KLUSTR v1.0: a closed-form steady-state model of atmospheric new particle formation from the free energy of the nucleating pair, Geosci. Model Dev., submitted, 2026.</p>",
+  "description": "<p>KLUSTR calculates the formation rate of new particles from two compounds A and B when their pair is the critical cluster or there is no barrier. The only thermodynamic input is the formation free energy of the pair.</p><p>Contents: KLUSTR in Python and as a Fortran module, each with a test, and the ACDC simulations and KLUSTR rates of Sect. 5 of the paper. verification/acdc/ACDC/ is an unchanged copy of ACDC 2024_02_12 (https://github.com/tolenius/ACDC) under its own GPL-3.0 licence.</p><p>The model is described in Halonen, R.: KLUSTR v1.0: a closed-form steady-state model of atmospheric new particle formation from the free energy of the nucleating pair, Geosci. Model Dev., submitted, 2026.</p>",
   "creators": [
     {
       "name": "Halonen, Roope",
