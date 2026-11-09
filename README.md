@@ -51,7 +51,8 @@ writes the ACDC and KLUSTR values for them into `verification/acdc/klustr_<free 
 the 120 s limit of one ACDC steady state can converge differently on another computer, which changes the number of
 conditions by a few.
 
-The files of the paper (Table 1, Fig. 1 and Sect. 5) are in `verification/paper/`.
+The ACDC and KLUSTR values of the compared conditions of the paper (Fig. 1 and the comparison in Table 1) are in
+`verification/paper/`.
 
 ## Licence
 
